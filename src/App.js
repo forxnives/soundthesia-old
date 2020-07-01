@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import JSSoup from 'jssoup';
+import SoundCloudAudio from 'soundcloud-audio'
 
 
 
@@ -8,9 +8,13 @@ import JSSoup from 'jssoup';
 class App extends React.Component {
   constructor(props){
     super(props);
+    this.state = {
+      url: 'https://soundcloud.com/montebooker/atthecrib',
+      url2: 'https://soundcloud.com/mrsurf/kaut_up',
+      scPlayer: '',
+      scPlayer2: ''
+    };
 
-
-    this.url = 'https://soundcloud.com/luiguibleand/luigui-bleand-filling-feat-goldy-boy';
 
 
   }
@@ -18,36 +22,73 @@ class App extends React.Component {
   
 
 
-  htmlFetch = async (urlString) => {
-    const response = await fetch(urlString)
-    const body = await response.text()
-    return body
-  }
+  componentDidMount() {
 
-// var soup = new JSSoup('<html><head>hello</head></html>');
-// htmlFetch()
+    const scPlayer = new SoundCloudAudio('a3dd183a357fcff9a6943c0d65664087');
+    // this.state.scPlayer = new SoundCloudAudio('a3dd183a357fcff9a6943c0d65664087')
+    this.setState({scPlayer: scPlayer })
 
-  linkExtract = async (body) => {
-    // const soup = await this.htmlFetch();
-    const html = await this.htmlFetch(this.url);
-    const soup = await new JSSoup(html);
-    const thing = soup.findAll('script');
-    const contents = thing[thing.length -1].contents[0]._text
-    const startIndex = contents.indexOf('[{"id"');  
-    const rawArray = contents.slice(startIndex, -2);
-    const obj = JSON.parse(rawArray);
-    const link = obj[5].data[0].media.transcodings[1].url;
+    const scPlayer2 = new SoundCloudAudio('a3dd183a357fcff9a6943c0d65664087');
 
-    console.log(link)
+    this.setState({scPlayer2: scPlayer2 })
+
+
+
+
+    // console.log(this.state.url)
   }
 
 
+  callbackTest (track) {
+    console.log(track);
+
+  }
 
 
-componentDidMount() {
-  this.linkExtract()
-  // console.log(test);
-}
+  loadTrack() {
+    console.log('loading')
+
+
+    this.state.scPlayer.resolve(this.state.url, this.callbackTest);
+
+  }
+
+  loadTrack2() {
+    console.log('loading')
+
+
+    this.state.scPlayer2.resolve(this.state.url2, this.callbackTest);
+
+  }
+
+
+  playTrack() {
+    // console.log(this.state.scPlayer)
+    this.state.scPlayer.play()
+
+
+  }
+
+  playTrack2() {
+    // console.log(this.state.scPlayer)
+    this.state.scPlayer2.play()
+
+
+  }
+
+
+
+//  {
+//   // do smth with track object
+//   // e.g. display data in a view etc.
+//   console.log(track);
+
+//   // once track is loaded it can be played
+//   scPlayer.play();
+
+//   // stop playing track and keep silence
+//   scPlayer.pause();
+// });
 
 
 
@@ -55,6 +96,12 @@ componentDidMount() {
   render() {
     return(
       <div>
+        <button type="button" onClick={() => this.loadTrack()}>Load1</button>
+        <button type="button" onClick={() => this.playTrack()}>PLay1</button>
+        <button type="button" onClick={() => this.loadTrack2()}>Load2</button>
+        <button type="button" onClick={() => this.playTrack2()}>PLay2</button>
+
+
       </div>
 
 
@@ -62,6 +109,6 @@ componentDidMount() {
     );
   };
 
-}
+};
 
 export default App;
