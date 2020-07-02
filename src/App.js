@@ -1,6 +1,12 @@
 import React from 'react';
 import './App.css';
 import SoundCloudAudio from 'soundcloud-audio'
+import cdj from './cdj'
+import playlister from './playlister'
+
+import Deck from './Components/Deck/Deck'
+import Playlist from './Components/Playlist/Playlist'
+
 
 
 
@@ -9,11 +15,16 @@ class App extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      url: 'https://soundcloud.com/montebooker/atthecrib',
-      url2: 'https://soundcloud.com/mrsurf/kaut_up',
-      scPlayer: '',
-      scPlayer2: ''
+      songPlaylist: []
+
+
     };
+    this.scPlayer1='';
+    this.scPlayer2='';
+    this.deck1='';
+    this.deck2='';
+    this.playlister='';
+    this.updatedSongs=[];
 
 
 
@@ -24,82 +35,56 @@ class App extends React.Component {
 
   componentDidMount() {
 
-    const scPlayer = new SoundCloudAudio('a3dd183a357fcff9a6943c0d65664087');
-    // this.state.scPlayer = new SoundCloudAudio('a3dd183a357fcff9a6943c0d65664087')
-    this.setState({scPlayer: scPlayer })
+    this.scPlayer1 = new SoundCloudAudio('a3dd183a357fcff9a6943c0d65664087');
 
-    const scPlayer2 = new SoundCloudAudio('a3dd183a357fcff9a6943c0d65664087');
+    this.deck1 = new cdj(this.scPlayer1)
+    this.playlister = new playlister(this.scPlayer1, this.state.songPlaylist)
+  }
 
-    this.setState({scPlayer2: scPlayer2 })
-
-
-
-
-    // console.log(this.state.url)
+  componentDidUpdate(){
+    console.log('updated')
   }
 
 
-  callbackTest (track) {
-    console.log(track);
 
+
+  addSong = async () => {
+    let array = []
+    const songObj = await this.playlister.songResolve();
+    await array.push(songObj);
+    this.updatedSongs = await this.state.songPlaylist.concat(array)
+
+    
+
+    await this.setState({songPlaylist: this.updatedSongs})
+
+    // this.setState({songPlaylist: updatedSongs});
   }
 
+  removeSong() {
 
-  loadTrack() {
-    console.log('loading')
-
-
-    this.state.scPlayer.resolve(this.state.url, this.callbackTest);
-
-  }
-
-  loadTrack2() {
-    console.log('loading')
-
-
-    this.state.scPlayer2.resolve(this.state.url2, this.callbackTest);
-
-  }
-
-
-  playTrack() {
-    // console.log(this.state.scPlayer)
-    this.state.scPlayer.play()
-
-
-  }
-
-  playTrack2() {
-    // console.log(this.state.scPlayer)
-    this.state.scPlayer2.play()
-
+    // const updatedSongs = this.state.songPlaylist.concat('new value')
+    this.setState({songPlaylist: this.updatedSongs})
 
   }
 
 
 
-//  {
-//   // do smth with track object
-//   // e.g. display data in a view etc.
-//   console.log(track);
+  test(){
+    console.log(this.state.songPlaylist[0][0].title)
 
-//   // once track is loaded it can be played
-//   scPlayer.play();
-
-//   // stop playing track and keep silence
-//   scPlayer.pause();
-// });
-
-
+  }
 
 
   render() {
     return(
       <div>
-        <button type="button" onClick={() => this.loadTrack()}>Load1</button>
-        <button type="button" onClick={() => this.playTrack()}>PLay1</button>
-        <button type="button" onClick={() => this.loadTrack2()}>Load2</button>
-        <button type="button" onClick={() => this.playTrack2()}>PLay2</button>
+
+        <Deck play={() => this.deck1.playSong()} />
+        <Playlist songPlaylist = { this.state.songPlaylist } updatedSongs={this.updatedSongs} addSong={() => this.addSong()} removeSong={()=> this.removeSong()} />
+        <button onClick={()=> this.test()} > test </button>
+        
+
 
 
       </div>
