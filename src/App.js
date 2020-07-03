@@ -1,99 +1,114 @@
-import React from 'react';
+import React, { useState } from "react";
 import './App.css';
-import SoundCloudAudio from 'soundcloud-audio'
-import cdj from './cdj'
-import playlister from './playlister'
+import { nanoid } from "nanoid";
 
-import Deck from './Components/Deck/Deck'
-import Playlist from './Components/Playlist/Playlist'
+// import SoundCloudAudio from 'soundcloud-audio'
+// import cdj from './cdj'
+// import playlister from './playlister'
 
+// import Deck from './Components/Deck/Deck'
+// import Playlist from './Components/Playlist/Playlist'
+import SongItem from './Components/SongItem/SongItem'
+import Form from './Components/Form/Form'
+import Filterbutton from './Components/Filterbutton/Filterbutton'
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const FILTER_MAP = {
+  All: () => true,
+  Active: task => !task.completed,
+  Played: task => task.completed
+};
 
-
-class App extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      songPlaylist: []
-
-
-    };
-    this.scPlayer1='';
-    this.scPlayer2='';
-    this.deck1='';
-    this.deck2='';
-    this.playlister='';
-    this.updatedSongs=[];
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+export default function App(props) {
 
+  const [tasks, setTasks] = useState(props.tasks)
+
+
+
+  
+  function toggleTaskCompleted(id) {
+    const updatedTasks = tasks.map(task=> {
+      if (task.id === id){
+        return {...task, played: !task.played}
+        
+      }
+      return task;
+    })
+    setTasks(updatedTasks);
+
+  }
+
+  const taskList = tasks.map(task=> 
+    (
+      <SongItem title={task.title} id={task.id} played={task.played} key={task.id} toggleTaskCompleted={toggleTaskCompleted} deleteTask={deleteTask} editTask={editTask} />
+    )
+  )
+
+
+
+
+  const tasksNoun = taskList.length !== 1 ? 'tasks' : 'task';
+  const headingText = `${taskList.length} ${tasksNoun} remaining`;
+
+
+
+  function addTask(title) {
+    const newTask = { id: "todo -" + nanoid(), title: title, played: false };
+    setTasks([...tasks, newTask]);
+  }
+
+  function deleteTask(id) {
+    const updatedTasks = tasks.filter(task => id !== task.id)
+      setTasks(updatedTasks)
+    }
+  
+  function editTask(id, newTitle) {
+    // console.log(id, newTitle)
+
+    const updatedTasks = tasks.map(task=> {
+      if (id === task.id){
+        return {...task, title: newTitle}
+      }
+      return task
+    })
+    setTasks(updatedTasks)
   }
 
   
 
-
-  componentDidMount() {
-
-    this.scPlayer1 = new SoundCloudAudio('a3dd183a357fcff9a6943c0d65664087');
-
-    this.deck1 = new cdj(this.scPlayer1)
-    this.playlister = new playlister(this.scPlayer1, this.state.songPlaylist)
-  }
-
-  componentDidUpdate(){
-    console.log('updated')
-  }
-
-
-
-
-  addSong = async () => {
-    let array = []
-    const songObj = await this.playlister.songResolve();
-    await array.push(songObj);
-    this.updatedSongs = await this.state.songPlaylist.concat(array)
-
+  
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
+    
+  return (
+    <div className="todoapp stack-large">
+      <h1>SoundThesia</h1>
 
-    await this.setState({songPlaylist: this.updatedSongs})
+      <Form addTask={addTask} />
 
-    // this.setState({songPlaylist: updatedSongs});
-  }
+      <Filterbutton />
 
-  removeSong() {
-
-    // const updatedSongs = this.state.songPlaylist.concat('new value')
-    this.setState({songPlaylist: this.updatedSongs})
-
-  }
-
-
-
-  test(){
-    console.log(this.state.songPlaylist[0][0].title)
-
-  }
-
-
-  render() {
-    return(
-      <div>
-
-        <Deck play={() => this.deck1.playSong()} />
-        <Playlist songPlaylist = { this.state.songPlaylist } updatedSongs={this.updatedSongs} addSong={() => this.addSong()} removeSong={()=> this.removeSong()} />
-        <button onClick={()=> this.test()} > test </button>
+      <h2 id="list-heading">
+        {headingText}
+      </h2>
+      <ul
         
+        className="todo-list stack-large stack-exception"
+        aria-labelledby="list-heading"
+      >
+
+        {taskList}
 
 
-
-      </div>
-
-
-
-    );
-  };
+      </ul>
+    </div>
+  );
+  
 
 };
 
-export default App;
+// export default App;

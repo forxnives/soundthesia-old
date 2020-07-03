@@ -4,9 +4,15 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+const DATA = [
+  { id: "todo-0", title: "Eat", played: true },
+  { id: "todo-1", title: "Sleep", played: false },
+  { id: "todo-2", title: "Repeat", played: false }
+];
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <App tasks={DATA} />
   </React.StrictMode>,
   document.getElementById('root')
 );
